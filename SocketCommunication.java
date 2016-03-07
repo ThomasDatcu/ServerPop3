@@ -34,8 +34,12 @@ public class SocketCommunication extends Thread {
 	}
 
 	public void start(){
-		Byte[] output;
-	//	outputToClient.writeByte("");
+		try {
+			outputToClient.writeBytes("+OK, Serveur Pop3 Ready");
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 	//	outputToClient.write(arg0, arg1, arg2);
 		boolean exit = false;
 		while(!exit){
@@ -52,6 +56,18 @@ public class SocketCommunication extends Thread {
 		}
 		
 	
+	}
+	
+	private int send(String s){
+		
+		try {
+			outputToClient.writeBytes(s);
+			return 0;
+		} catch (IOException e) {
+			e.printStackTrace();
+			return -1;
+		}
+		
 	}
 
 }

@@ -1,3 +1,5 @@
+package ServerPop3;
+
 
 import java.io.BufferedReader;
 import java.util.ArrayList;

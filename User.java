@@ -1,3 +1,5 @@
+package ServerPop3;
+
 
 import java.util.ArrayList;
 
@@ -21,5 +23,25 @@ public class User {
     public boolean connect(String password) {
         return this.password.compareTo(password) == 0;
     }
+
+	public int getNumberOfMessageInMaildrop() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	public int getLengthOfMailDrop() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	public int getMessageLength(int i) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	public void setMarkDeleted(int i) {
+		// TODO Auto-generated method stub
+		
+	}
 	
 }

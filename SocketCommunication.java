@@ -127,7 +127,8 @@ public class SocketCommunication extends Thread {
 					}else if(splitTextFromClient[0].compareTo("RETR") == 0){
 						
 					}else if(splitTextFromClient[0].compareTo("DELE") == 0){
-						
+						int i =0;
+						this.mailUser.setMarkDeleted(i);
 					}else if(splitTextFromClient[0].compareTo("NOOP") == 0){
 						
 					}else if(splitTextFromClient[0].compareTo("RSET") == 0){

@@ -27,6 +27,7 @@ public class UserList {
                     String[] userIds = ligne.split(" ");
                     userList.add(new User(Integer.parseInt(userIds[0]), userIds[1], userIds[2]));
                 }
+                buff.close();
             }catch(FileNotFoundException e){
                 System.out.println(e.getMessage());
             } catch (IOException ex) {

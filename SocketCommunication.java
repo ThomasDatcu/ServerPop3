@@ -19,6 +19,8 @@ public class SocketCommunication extends Thread {
 	int idClient;
 	String nameClient;
 	Message MailBox[];
+	int msgInMailDrop;
+	int mailDropLength;
 	Socket s;
 	BufferedReader inputFromClient;
 	DataOutputStream outputToClient;
@@ -64,6 +66,8 @@ public class SocketCommunication extends Thread {
 						this.mailUser = allUsers.connect(splitTextFromClient[1], splitTextFromClient[2]);
 						if(this.mailUser != null){
 							this.state = 2;
+							msgInMailDrop = this.mailUser.getNumberOfMessageInMaildrop();
+							mailDropLength = this.mailUser.getLengthOfMailDrop();
 							//TODO send message successfuly log in
 						}else{
 							//TODO send message wrong username/password
@@ -88,6 +92,8 @@ public class SocketCommunication extends Thread {
 						this.mailUser = allUsers.connect(clientUserName, splitTextFromClient[1]);
 						if(this.mailUser != null){
 							this.state = 2;
+							msgInMailDrop = this.mailUser.getNumberOfMessageInMaildrop();
+							mailDropLength = this.mailUser.getLengthOfMailDrop();
 							//TODO send message successfuly log in
 						}else{
 							//TODO send message wrong password
@@ -99,6 +105,39 @@ public class SocketCommunication extends Thread {
 					break;
 				case 2 : 
 					// STAT / LIST[msg] / RETR msg / DELE msg / NOOP / RSET / QUIT
+					if(splitTextFromClient[0].compareTo("STAT") == 0){
+						//TODO send message with the number of message in the maildrop and the total length of the maildrop in octet
+					}else if(splitTextFromClient[0].compareTo("LIST") == 0){
+						if(splitTextFromClient.length == 1){
+							//TODO send number of message and length of all the mailbox
+							for(int i = 0; i<msgInMailDrop;i++){
+								int msgLength = this.mailUser.getMessageLength(i);
+								//TODO send message : +OK i msgLength
+							}
+						}else{
+							int msgNumber = this.tryParse(splitTextFromClient[1]);
+							if(msgNumber != -1){
+								int msgLength = this.mailUser.getMessageLength(msgNumber);
+								//TODO addCase messageIsMarkDeleted
+								//TODO send message +OK i msgLength										
+							}else{
+								//TODO send message -ERREUR no such messsage
+							}							
+						}						
+					}else if(splitTextFromClient[0].compareTo("RETR") == 0){
+						
+					}else if(splitTextFromClient[0].compareTo("DELE") == 0){
+						
+					}else if(splitTextFromClient[0].compareTo("NOOP") == 0){
+						
+					}else if(splitTextFromClient[0].compareTo("RSET") == 0){
+						
+					}else if(splitTextFromClient[0].compareTo("QUIT") == 0){
+						
+					}else{
+						//TODO send unknown inbound action
+					}
+						
 					break;					
 				case 3 : 
 					break;					
@@ -120,5 +159,13 @@ public class SocketCommunication extends Thread {
 		}
 		
 	}
+	
+	private int tryParse(String text) {
+		  try {
+		    return Integer.parseInt(text);
+		  } catch (NumberFormatException e) {
+		    return -1;
+		  }
+		}
 
 }

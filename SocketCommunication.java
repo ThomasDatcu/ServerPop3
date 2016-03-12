@@ -22,14 +22,16 @@ public class SocketCommunication extends Thread {
 	Socket s;
 	BufferedReader inputFromClient;
 	DataOutputStream outputToClient;
+	UserList allUsers;
+	User mailUser;
 	
-	public SocketCommunication(Socket s) throws IOException{
-		
+	public SocketCommunication(Socket s, UserList allUsers) throws IOException{
+		this.allUsers = allUsers;
 		this.state = 0;
 		this.s = s;
 		this.inputFromClient = new BufferedReader(new InputStreamReader(s.getInputStream()));
 		this.outputToClient = new DataOutputStream(s.getOutputStream());
-		
+		this.mailUser = null;
 		
 	}
 
@@ -37,21 +39,70 @@ public class SocketCommunication extends Thread {
 		try {
 			outputToClient.writeBytes("+OK, Serveur Pop3 Ready");
 		} catch (IOException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 	//	outputToClient.write(arg0, arg1, arg2);
 		boolean exit = false;
+		String clientUserName = "";
+		String textFromClient = "";
+		String[] splitTextFromClient = new String[5];
+		
 		while(!exit){
+			
 			try {
-				inputFromClient.read();
+				textFromClient = inputFromClient.readLine();
+				splitTextFromClient = textFromClient.split(" ");
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			switch(state){
-			case 0 :
-				
+			
+				case 0 :
+					//soit reception  APOP soit reception USER
+					if(splitTextFromClient[0].compareTo("APOP") == 0){
+						this.mailUser = allUsers.connect(splitTextFromClient[1], splitTextFromClient[2]);
+						if(this.mailUser != null){
+							this.state = 2;
+							//TODO send message successfuly log in
+						}else{
+							//TODO send message wrong username/password
+						}
+					}else if(splitTextFromClient[0].compareTo("USER") == 0){
+						String userName = splitTextFromClient[1];
+						clientUserName = allUsers.chechUser(userName);
+						if(this.mailUser != null){
+							this.state = 1;
+							//TODO send message waiting for password
+						}else{
+							//TODO send message wrong username
+						}
+					}else if(splitTextFromClient[0].compareTo("QUIT") == 0){
+						//TODO send server is signing off
+					}else{
+						//TODO send unknown inbound action
+					}
+					break;
+				case 1 : 
+					if(splitTextFromClient[0].compareTo("PASS")==0){
+						this.mailUser = allUsers.connect(clientUserName, splitTextFromClient[1]);
+						if(this.mailUser != null){
+							this.state = 2;
+							//TODO send message successfuly log in
+						}else{
+							//TODO send message wrong password
+							//Que se passe t'il si on se trompe de password ? boucle sur l'état ou retour état 0 ?
+						}
+					}else{
+						//TODO send unknown inbound action
+					}
+					break;
+				case 2 : 
+					// STAT / LIST[msg] / RETR msg / DELE msg / NOOP / RSET / QUIT
+					break;					
+				case 3 : 
+					break;					
+				default : 				
 			}
 		}
 		

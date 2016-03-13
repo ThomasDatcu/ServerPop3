@@ -175,7 +175,7 @@ public class SocketCommunication extends Thread {
 					}else if(splitTextFromClient[0].compareTo("NOOP") == 0){
 						//TODO send an easter egg :-)
 					}else if(splitTextFromClient[0].compareTo("RSET") == 0){
-						this.mailUser.unMarkAllMessages();
+						this.mailUser.unmarkAllMessages();
 						this.send("+OK all messages unmark");
 					}else if(splitTextFromClient[0].compareTo("QUIT") == 0){
 						state = 3;

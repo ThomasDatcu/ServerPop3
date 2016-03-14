@@ -123,15 +123,17 @@ public class User {
     
     public int disconnect(){
         FileOutputStream fos;
+        id = 0;
         try{
             fos = new FileOutputStream(new File("mails/user_"+ id +".txt"));
             OutputStreamWriter writer = new OutputStreamWriter(fos);
             BufferedWriter buff = new BufferedWriter(writer);
             for(Message mail : this.mails){
                 if(!mail.toBeDeleted){
-                    buff.write("" + mail.idMessage + mail.isNewMessage + "/n");
+                    buff.write("" + id + mail.isNewMessage + "/n");
                     buff.write(mail.text);
                 }
+                id++;
             }
             buff.close();
         }catch(FileNotFoundException e){

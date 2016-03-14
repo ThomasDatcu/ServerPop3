@@ -1,4 +1,4 @@
-package ServerPop3;
+package ServerPop3.ServerPop3;
 
 import java.io.IOException;
 import java.net.ServerSocket;

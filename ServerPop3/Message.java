@@ -1,4 +1,4 @@
-package ServerPop3;
+package ServerPop3.ServerPop3;
 
 public class Message {
 

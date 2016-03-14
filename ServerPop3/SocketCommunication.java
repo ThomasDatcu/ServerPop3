@@ -1,4 +1,4 @@
-package ServerPop3;
+package ServerPop3.ServerPop3;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -70,7 +70,7 @@ public class SocketCommunication extends Thread {
 						//this.mailUser = allUsers.connect(splitTextFromClient[1], splitTextFromClient[2]);
 						//if(this.mailUser != null){
 						if(splitTextFromClient[1].equals("tata") && splitTextFromClient[2].equals("toto")){						
-							this.writeBytes("+OK");
+							this.writeBytes("+OK maildrop has 2 messages");
 							this.flush();
 							System.out.println("An user matching the username and the "
 									+ "password send by the client has been found");

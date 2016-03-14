@@ -1,4 +1,4 @@
-package ServerPop3;
+package ServerPop3.ServerPop3;
 
 
 import java.io.BufferedReader;
@@ -19,18 +19,22 @@ public class UserList {
         //TO DO open file and load all users.
         FileInputStream fis;
         try{
+        	System.out.println("ouverture du fichier");
             fis = new FileInputStream(new File("users.txt"));
             InputStreamReader lecteur = new InputStreamReader(fis);
             BufferedReader buff = new BufferedReader(lecteur);
             String ligne;
+            System.out.println("chargement des utilisateurs");
             while((ligne=buff.readLine())!=null){
+            	System.out.println("ajout de l'utilisateur : " + ligne);
                 String[] userIds = ligne.split(" ");
                 userList.add(new User(Integer.parseInt(userIds[0]), userIds[1], userIds[2]));
             }
             buff.close();
         }catch(FileNotFoundException e){
-            System.out.println(e.getMessage());
+        	System.out.println("File user not found");
         } catch (IOException ex) {
+        	System.out.println("Error IO");
             Logger.getLogger(UserList.class.getName()).log(Level.SEVERE, null, ex);
         }
     }

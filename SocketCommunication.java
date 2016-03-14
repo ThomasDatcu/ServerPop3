@@ -23,6 +23,7 @@ public class SocketCommunication extends Thread {
 	BufferedReader inputFromClient;
 	DataOutputStream outputToClient;
 	
+	
 	public SocketCommunication(Socket s) throws IOException{
 		
 		this.state = 0;
@@ -58,6 +59,7 @@ public class SocketCommunication extends Thread {
 	
 	}
 	
+
 	private int send(String s){
 		
 		try {

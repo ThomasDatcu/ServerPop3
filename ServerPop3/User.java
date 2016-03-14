@@ -32,9 +32,18 @@ public class User {
             InputStreamReader lecteur = new InputStreamReader(fis);
             BufferedReader buff = new BufferedReader(lecteur);
             String ligne;
+            String ligneMail;
+            String message = "";
             while((ligne=buff.readLine())!=null){
                 String[] messageId = ligne.split(" ");
-                mails.add(new Message(Integer.parseInt(messageId[0]), Boolean.getBoolean(messageId[1]), buff.readLine()));
+                do{
+                    ligneMail=buff.readLine();
+                    message += ligneMail + "<CR><LF>";
+                }while(ligneMail.compareTo(".") != 0);
+                mails.add(
+                        new Message(Integer.parseInt(messageId[0]), 
+                                Boolean.getBoolean(messageId[1]), 
+                                message));
             }
         }catch(FileNotFoundException e){
             System.out.println(e.getMessage());

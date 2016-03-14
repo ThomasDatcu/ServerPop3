@@ -5,6 +5,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 
 
 public class SocketCommunication extends Thread {
@@ -25,12 +26,11 @@ public class SocketCommunication extends Thread {
 	BufferedReader inputFromClient;
 	DataOutputStream outputToClient;
 	UserList allUsers;
-	User mailUser;
-	
-	
+	User mailUser;	
 	
 
 	public SocketCommunication(Socket s, UserList allUsers) throws IOException{
+		System.out.println("Creating Communication Socket");
 		this.allUsers = allUsers;
 		this.state = 0;
 		this.s = s;
@@ -41,12 +41,9 @@ public class SocketCommunication extends Thread {
 	}
 
 	public void start(){
-		try {
-			outputToClient.writeBytes("+OK, Serveur Pop3 Ready");
-			this.flush();
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
+		System.out.println("Sending intialization message");
+		this.writeBytes("+OK Serveur Pop3 Ready");
+		this.flush();
 
 		boolean exit = false;
 		String clientUserName = "";
@@ -56,74 +53,104 @@ public class SocketCommunication extends Thread {
 		while(!exit){
 			
 			try {
+				System.out.println("Awainting for customer request");
 				textFromClient = inputFromClient.readLine();
 				splitTextFromClient = textFromClient.split(" ");
+				System.out.println("Data received from client, processing Data");
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 			switch(state){
 			
 				case 0 :
+					System.out.println("Server is in AUTHORIZATION state");
 					//soit reception  APOP soit reception USER
 					if(splitTextFromClient[0].compareTo("APOP") == 0){
-						this.mailUser = allUsers.connect(splitTextFromClient[1], splitTextFromClient[2]);
-						if(this.mailUser != null){
+						System.out.println("Server received an APOP command");
+						//this.mailUser = allUsers.connect(splitTextFromClient[1], splitTextFromClient[2]);
+						//if(this.mailUser != null){
+						if(splitTextFromClient[1].equals("tata") && splitTextFromClient[2].equals("toto")){						
+							this.writeBytes("+OK");
+							this.flush();
+							System.out.println("An user matching the username and the "
+									+ "password send by the client has been found");
 							this.state = 2;
 							msgInMailDrop = this.mailUser.getNumberOfMessageInMaildrop();
 							mailDropLength = this.mailUser.getLengthOfMailDrop();
-							this.writeBytes("+OK " + mailUser.getName() + " has " + 
+							this.writeBytes("+OK " + mailUser.getName() + " maildrop has " + 
 									msgInMailDrop + " messages (" + mailDropLength + "octects)");
 							this.flush();
+							System.out.println("Sending login confirmation to the user and moving to transaction state");
 						}else{
 							this.writeBytes("-ERR invalid username or password");
 							this.flush();
+							System.out.println("Sending err message to the client "
+									+ "because the input username/password is unknown");
 						}
 					}else if(splitTextFromClient[0].compareTo("USER") == 0){
+						System.out.println("Server received an USER command");
 						String userName = splitTextFromClient[1];
 						clientUserName = allUsers.chechUser(userName);
 						if(this.mailUser != null){
+							System.out.println("An user matching the input username has been found");
 							this.state = 1;
 							this.writeBytes("+OK waiting for " + userName + "'s password");
 							this.flush();
+							System.out.println("Moving to the awaiting password state ");
 						}else{
 							this.writeBytes("-ERR , sorry user : " + userName + "not found");
 							this.flush();
+							System.out.println("Sending err message to the client "
+									+ "because the input username is unknown");
 						}
 					}else if(splitTextFromClient[0].compareTo("QUIT") == 0){
 						this.writeBytes("+OK pop3 server is signing of");
 						this.flush();
-						this.close();
+						exit = true;
+						System.out.println("Server is signing of");
 					}else{
 						this.writeBytes("-ERR unknown inbound action");
 						this.flush();
+						System.out.println("Unknown inboud action");
 					}
 					break;
 				case 1 : 
+					System.out.println("Server is awaiting PASS command");
 					if(splitTextFromClient[0].compareTo("PASS")==0){
+						System.out.println("Server receive a PASS command");
 						this.mailUser = allUsers.connect(clientUserName, splitTextFromClient[1]);
 						if(this.mailUser != null){
+							System.out.println("Password is correct, connecting the user");
 							this.state = 2;
 							msgInMailDrop = this.mailUser.getNumberOfMessageInMaildrop();
 							mailDropLength = this.mailUser.getLengthOfMailDrop();
 							this.writeBytes("+OK " + mailUser.getName() + " has " + 
 									msgInMailDrop + " messages (" + mailDropLength + "octects)");
 							this.flush();
+							System.out.println("Sending login confirmation to the user and moving to transaction state");
 						}else{
 							this.writeBytes("-ERR wrong password ");
 							this.flush();
 							this.state = 0;
+							System.out.println("Sen");
 						}
 					}else{
 						this.writeBytes("-ERR unknown inbound action");
 						this.flush();
+						System.out.println("Unknown inboud action");
 					}
 					break;
 				case 2 : 
+					System.out.println("Server is in transaction state");
 					if(splitTextFromClient[0].compareTo("STAT") == 0){
+						System.out.println("Server Receive a STAT command");
 						this.writeBytes("+OK " + msgInMailDrop + " " + mailDropLength );
 						this.flush();
+						System.out.println("Sending number of messages and length of the messages in the maildrop");
 					}else if(splitTextFromClient[0].compareTo("LIST") == 0){
+						System.out.println("Server received a LIST command");
 						if(splitTextFromClient.length == 1){
+							System.out.println("There is no argument with the LIST command");
 							this.writeBytes("+OK " + msgInMailDrop + " message(s) ( " + mailDropLength + "octects)" );
 							this.flush();
 							for(int i = 0; i<msgInMailDrop;i++){
@@ -211,13 +238,15 @@ public class SocketCommunication extends Thread {
 						this.flush();
 					}						
 					break;					
-				case 3 : 
+				case 3 :
 					this.mailUser.disconnect();
-					this.close();
+					exit =true;
 					break;					
 				default : 				
 			}
 		}
+		
+		this.close();
 		
 	
 	}
@@ -240,7 +269,10 @@ public class SocketCommunication extends Thread {
 	private int writeBytes(String s){
 		try {
 			s = s +"\r\n";
-			outputToClient.writeBytes(s);
+			System.out.println(s);
+			outputToClient.write(s.getBytes());
+			System.out.println(s.getBytes());
+			//outputToClient.writeBytes(s);
 			return 0;
 		} catch (IOException e) {
 			e.printStackTrace();

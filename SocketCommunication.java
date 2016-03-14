@@ -27,6 +27,7 @@ public class SocketCommunication extends Thread {
 	UserList allUsers;
 	User mailUser;
 	
+
 	public SocketCommunication(Socket s, UserList allUsers) throws IOException{
 		this.allUsers = allUsers;
 		this.state = 0;

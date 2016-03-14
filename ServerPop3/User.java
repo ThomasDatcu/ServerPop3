@@ -19,7 +19,7 @@ public class User {
     private String name;
     private String password;
     private ArrayList<Message> mails;
-    private int nbMessages;
+    private final int nbMessages;
 
     public User(int id, String name, String password){
         this.id = id;
@@ -73,6 +73,7 @@ public class User {
         }
         return res;
     }
+    
     /**
      * 
      * @param i

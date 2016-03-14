@@ -27,6 +27,8 @@ public class SocketCommunication extends Thread {
 	UserList allUsers;
 	User mailUser;
 	
+	
+	
 
 	public SocketCommunication(Socket s, UserList allUsers) throws IOException{
 		this.allUsers = allUsers;
@@ -41,6 +43,7 @@ public class SocketCommunication extends Thread {
 	public void start(){
 		try {
 			outputToClient.writeBytes("+OK, Serveur Pop3 Ready");
+			this.flush();
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		}
@@ -68,25 +71,31 @@ public class SocketCommunication extends Thread {
 							this.state = 2;
 							msgInMailDrop = this.mailUser.getNumberOfMessageInMaildrop();
 							mailDropLength = this.mailUser.getLengthOfMailDrop();
-							this.send("+OK " + mailUser.getName() + " has " + 
+							this.writeBytes("+OK " + mailUser.getName() + " has " + 
 									msgInMailDrop + " messages (" + mailDropLength + "octects)");
+							this.flush();
 						}else{
-							this.send("-ERR invalid username or password");
+							this.writeBytes("-ERR invalid username or password");
+							this.flush();
 						}
 					}else if(splitTextFromClient[0].compareTo("USER") == 0){
 						String userName = splitTextFromClient[1];
 						clientUserName = allUsers.chechUser(userName);
 						if(this.mailUser != null){
 							this.state = 1;
-							this.send("+OK waiting for " + userName + "'s password");
+							this.writeBytes("+OK waiting for " + userName + "'s password");
+							this.flush();
 						}else{
-							this.send("-ERR , sorry user : " + userName + "not found");
+							this.writeBytes("-ERR , sorry user : " + userName + "not found");
+							this.flush();
 						}
 					}else if(splitTextFromClient[0].compareTo("QUIT") == 0){
-						this.send("+OK pop3 server is signing of");
+						this.writeBytes("+OK pop3 server is signing of");
+						this.flush();
 						this.close();
 					}else{
-						this.send("-ERR unknown inbound action");
+						this.writeBytes("-ERR unknown inbound action");
+						this.flush();
 					}
 					break;
 				case 1 : 
@@ -96,26 +105,30 @@ public class SocketCommunication extends Thread {
 							this.state = 2;
 							msgInMailDrop = this.mailUser.getNumberOfMessageInMaildrop();
 							mailDropLength = this.mailUser.getLengthOfMailDrop();
-							this.send("+OK " + mailUser.getName() + " has " + 
+							this.writeBytes("+OK " + mailUser.getName() + " has " + 
 									msgInMailDrop + " messages (" + mailDropLength + "octects)");
+							this.flush();
 						}else{
-							this.send("-ERR wrong password ");
-							//Que se passe t'il si on se trompe de password ? boucle sur l'état ou retour état 0 ?
+							this.writeBytes("-ERR wrong password ");
+							this.flush();
+							this.state = 0;
 						}
 					}else{
-						this.send("-ERR unknown inbound action");
+						this.writeBytes("-ERR unknown inbound action");
+						this.flush();
 					}
 					break;
 				case 2 : 
-					//RETR msg / DELE msg / NOOP / RSET / QUIT
 					if(splitTextFromClient[0].compareTo("STAT") == 0){
-						this.send("+OK " + msgInMailDrop + " " + mailDropLength );
+						this.writeBytes("+OK " + msgInMailDrop + " " + mailDropLength );
+						this.flush();
 					}else if(splitTextFromClient[0].compareTo("LIST") == 0){
 						if(splitTextFromClient.length == 1){
-							this.send("+OK " + msgInMailDrop + " message(s) ( " + mailDropLength + "octects)" );
+							this.writeBytes("+OK " + msgInMailDrop + " message(s) ( " + mailDropLength + "octects)" );
+							this.flush();
 							for(int i = 0; i<msgInMailDrop;i++){
 								int msgLength = this.mailUser.getMessageLength(i);
-								this.send("+OK " + i + " " + msgLength);
+								this.writeBytes("+OK " + i + " " + msgLength);
 							}
 						}else{
 							int msgNumber = this.tryParse(splitTextFromClient[1]);
@@ -123,17 +136,21 @@ public class SocketCommunication extends Thread {
 								int msgLength = this.mailUser.getMessageLength(msgNumber);
 								switch(msgLength){
 									case -1 : 
-										this.send("-ERR this message is already marked as deleted");
+										this.writeBytes("-ERR this message is already marked as deleted");
+										this.flush();
 										break;
 									case -2 :
-										this.send("-ERR no such message");
+										this.writeBytes("-ERR no such message");
+										this.flush();
 										break;
 									default :
-										this.send("+OK " + msgNumber + " " + msgLength );
+										this.writeBytes("+OK " + msgNumber + " " + msgLength );
+										this.flush();
 										break;
 								}																		
 							}else{
-								this.send("-ERR not a number");
+								this.writeBytes("-ERR not a number");
+								this.flush();
 							}							
 						}						
 					}else if(splitTextFromClient[0].compareTo("RETR") == 0){
@@ -141,15 +158,19 @@ public class SocketCommunication extends Thread {
 						if(msgNumber != -1){
 							String messageTxt = this.mailUser.getMessageText(msgNumber);
 							if(messageTxt.equals("-1")){
-								this.send("-ERR message marked as deleted");
+								this.writeBytes("-ERR message marked as deleted");
+								this.flush();
 							}else if(messageTxt.equals("-2")){
-								this.send("-ERR no such message");
+								this.writeBytes("-ERR no such message");
+								this.flush();
 							}else{
-								this.send("+OK sending message " + msgNumber);
-								this.send(messageTxt);
+								this.writeBytes("+OK sending message " + msgNumber);
+								this.writeBytes(messageTxt);
+								this.flush();
 							}
 						}else{
-							this.send("-ERR not a number");
+							this.writeBytes("-ERR not a number");
+							this.flush();
 						}
 						
 					}else if(splitTextFromClient[0].compareTo("DELE") == 0){
@@ -158,30 +179,36 @@ public class SocketCommunication extends Thread {
 							int errCode = this.mailUser.setMarkDeleted(msgNumber);
 							switch(errCode){
 								case 0 :
-									this.send("+OK message marked as deleted");
+									this.writeBytes("+OK message marked as deleted");
+									this.flush();
 									break;
 								case -1 : 
-									this.send("-ERR message " + msgNumber + " already deleted");
+									this.writeBytes("-ERR message " + msgNumber + " already deleted");
+									this.flush();
 									break;
 								case -2 : 
-									this.send("-ERR no such message");
+									this.writeBytes("-ERR no such message");
+									this.flush();
 									break;
 								default :
 									System.out.println("This shouldn't happen");
 									break;
 							}
 						}else{
-							this.send("-ERR not a number");
+							this.writeBytes("-ERR not a number");
+							this.flush();
 						}
 					}else if(splitTextFromClient[0].compareTo("NOOP") == 0){
 						//TODO send an easter egg :-)
 					}else if(splitTextFromClient[0].compareTo("RSET") == 0){
 						this.mailUser.unmarkAllMessages();
-						this.send("+OK all messages unmark");
+						this.writeBytes("+OK all messages unmark");
+						this.flush();
 					}else if(splitTextFromClient[0].compareTo("QUIT") == 0){
 						state = 3;
 					}else{
-						this.send("-ERR unknown inbound action");
+						this.writeBytes("-ERR unknown inbound action");
+						this.flush();
 					}						
 					break;					
 				case 3 : 
@@ -210,9 +237,19 @@ public class SocketCommunication extends Thread {
 		
 	}
 
-	private int send(String s){
+	private int writeBytes(String s){
 		try {
+			s = s +"\r\n";
 			outputToClient.writeBytes(s);
+			return 0;
+		} catch (IOException e) {
+			e.printStackTrace();
+			return -1;
+		}
+	}
+	
+	public int flush(){
+		try {
 			outputToClient.flush();
 			return 0;
 		} catch (IOException e) {

@@ -42,9 +42,9 @@ public class Server {
 
 
 	private void initCommunication(Socket s) throws IOException {
-		// TODO Auto-generated method stub
 		SocketCommunication socketCom = new SocketCommunication(s, this.allUsers); 
 		socketCom.start();
+		System.out.println("Socket communication start");
 		
 	}
 	

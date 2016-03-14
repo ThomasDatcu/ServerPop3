@@ -8,11 +8,13 @@ import java.net.Socket;
 	
 public class Server {
 	ServerSocket socket;
+	UserList allUsers;
 	
 	public Server(){
 		try {
-			
+			this.allUsers = new UserList();
 			this.socket = new ServerSocket(110);
+			System.out.println("Server Starting");
 			
 		} catch (IOException e) {
 			System.out.println("Erreur impossible d'ouvrir le socket sur le port 110");
@@ -28,6 +30,7 @@ public class Server {
 		while(running){
 			Socket s = null;
 			try {
+				System.out.println("Server awaiting connection");
 				s = socket.accept();
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -40,7 +43,7 @@ public class Server {
 
 	private void initCommunication(Socket s) throws IOException {
 		// TODO Auto-generated method stub
-		SocketCommunication socketCom = new SocketCommunication(s); 
+		SocketCommunication socketCom = new SocketCommunication(s, this.allUsers); 
 		socketCom.start();
 		
 	}

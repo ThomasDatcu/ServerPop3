@@ -25,25 +25,29 @@ public class User {
         this.id = id;
         this.name = name;
         this.password = password;
+        this.mails = new ArrayList<>();
         //TO DO handle mails arraylist
         FileInputStream fis;
         try{
-            fis = new FileInputStream(new File("mails/user_"+ id +".txt"));
+            fis = new FileInputStream(new File("mails/user_"+ id + ".txt"));
             InputStreamReader lecteur = new InputStreamReader(fis);
             BufferedReader buff = new BufferedReader(lecteur);
             String ligne;
             String ligneMail;
-            String message = "";
+            String message;
             while((ligne=buff.readLine())!=null){
+                message = "";
                 String[] messageId = ligne.split(" ");
                 do{
                     ligneMail=buff.readLine();
                     message += ligneMail + "<CR><LF>";
                 }while(ligneMail.compareTo(".") != 0);
+                System.out.println(messageId[0]+ "/" + messageId[1]);
                 mails.add(
                         new Message(Integer.parseInt(messageId[0]), 
                                 Boolean.getBoolean(messageId[1]), 
                                 message));
+                buff.readLine();
             }
         }catch(FileNotFoundException e){
             System.out.println(e.getMessage());
@@ -133,17 +137,18 @@ public class User {
     
     public int disconnect(){
         FileOutputStream fos;
-        id = 0;
+        int id_message=0;
         try{
-            fos = new FileOutputStream(new File("mails/user_"+ id +".txt"));
+            fos = new FileOutputStream(new File("mails/user_"+ this.id +".txt"));
             OutputStreamWriter writer = new OutputStreamWriter(fos);
             BufferedWriter buff = new BufferedWriter(writer);
             for(Message mail : this.mails){
                 if(!mail.toBeDeleted){
-                    buff.write("" + id + mail.isNewMessage + "/n");
-                    buff.write(mail.text);
+                    buff.write(id_message + " " + mail.isNewMessage + "\n");
+                    String modif = mail.text.replaceAll("<CR><LF>", "\n");
+                    buff.write(modif);
                 }
-                id++;
+                id_message++;
             }
             buff.close();
         }catch(FileNotFoundException e){

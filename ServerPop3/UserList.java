@@ -18,8 +18,9 @@ public class UserList {
     public UserList(){
         //TO DO open file and load all users.
         FileInputStream fis;
+        this.userList = new ArrayList<>();
         try{
-        	System.out.println("ouverture du fichier");
+            System.out.println("ouverture du fichier");
             fis = new FileInputStream(new File("users.txt"));
             InputStreamReader lecteur = new InputStreamReader(fis);
             BufferedReader buff = new BufferedReader(lecteur);
@@ -44,8 +45,6 @@ public class UserList {
             if(mailUser.getName().compareTo(name) == 0){
                 if(mailUser.connect(password))
                     return mailUser;
-                else
-                    return null;
             }
         }
         return null;

@@ -67,13 +67,14 @@ public class SocketCommunication extends Thread {
 					//soit reception  APOP soit reception USER
 					if(splitTextFromClient[0].compareTo("APOP") == 0){
 						System.out.println("Server received an APOP command");
-						//this.mailUser = allUsers.connect(splitTextFromClient[1], splitTextFromClient[2]);
-						//if(this.mailUser != null){
-						if(splitTextFromClient[1].equals("tata") && splitTextFromClient[2].equals("toto")){						
+						this.mailUser = allUsers.connect(splitTextFromClient[1], splitTextFromClient[2]);
+						if(this.mailUser != null){
+							
+						/*if(splitTextFromClient[1].equals("tata") && splitTextFromClient[2].equals("toto")){						
 							this.writeBytes("+OK maildrop has 2 messages");
-							this.flush();
+							this.flush();*/
 							System.out.println("An user matching the username and the "
-									+ "password send by the client has been found");
+									+ "password sent by the client has been found");
 							this.state = 2;
 							msgInMailDrop = this.mailUser.getNumberOfMessageInMaildrop();
 							mailDropLength = this.mailUser.getLengthOfMailDrop();

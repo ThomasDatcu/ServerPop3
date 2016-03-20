@@ -24,7 +24,7 @@ public class Server {
 	
 	
 	
-	public void run() throws IOException{
+	public void run(){
 		
 		boolean running = true;
 		while(running){
@@ -32,10 +32,10 @@ public class Server {
 			try {
 				System.out.println("Server awaiting connection");
 				s = socket.accept();
+                                this.initCommunication(s);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			this.initCommunication(s);
 		}
 	}
 

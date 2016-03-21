@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 public class SocketCommunication extends Thread {
@@ -29,7 +31,8 @@ public class SocketCommunication extends Thread {
     User mailUser;	
 
 
-    public SocketCommunication(Socket s, UserList allUsers) throws IOException{
+    public SocketCommunication(Socket s, UserList allUsers){
+        try {
             System.out.println("Creating Communication Socket");
             this.allUsers = allUsers;
             this.state = 0;
@@ -37,6 +40,9 @@ public class SocketCommunication extends Thread {
             this.inputFromClient = new BufferedReader(new InputStreamReader(s.getInputStream()));
             this.outputToClient = new DataOutputStream(s.getOutputStream());
             this.mailUser = null;
+        } catch (IOException ex) {
+            System.out.println("Connection closed :/");
+        }
 
     }
 
@@ -54,13 +60,13 @@ public class SocketCommunication extends Thread {
         while(!exit && state !=3){
 
             try {
-                    System.out.println("Awainting for customer request");
-                    textFromClient = inputFromClient.readLine();
-                    System.out.println("Client request : " + textFromClient);
-                    splitTextFromClient = textFromClient.split(" ");
-                    System.out.println("Data received from client, processing Data");
+                System.out.println("Awainting for customer request");
+                textFromClient = inputFromClient.readLine();
+                System.out.println("Client request : " + textFromClient);
+                splitTextFromClient = textFromClient.split(" ");
+                System.out.println("Data received from client, processing Data");
             } catch (IOException e) {
-                    e.printStackTrace();
+                e.printStackTrace();
             }
             switch(state){
 
@@ -154,12 +160,16 @@ public class SocketCommunication extends Thread {
                         System.out.println("Server received a LIST command");
                         if(splitTextFromClient.length == 1){
                             System.out.println("There is no argument with the LIST command");
-                            this.writeBytes("+OK " + msgInMailDrop + " message(s) ( " + mailDropLength + "octects)" );
+                            String toSend = "";
+                            toSend += "+OK " + msgInMailDrop + " message(s) ( " + mailDropLength + "octects)";
+                            //this.writeBytes("+OK " + msgInMailDrop + " message(s) ( " + mailDropLength + "octects)" );
                             this.flush();
                             for(int i = 0; i<msgInMailDrop;i++){
                                 int msgLength = this.mailUser.getMessageLength(i);
-                                this.writeBytes("+OK " + i + " " + msgLength);
+                                toSend += "+OK " + i + " " + msgLength;
+                                //this.writeBytes("+OK " + i + " " + msgLength);
                             }
+                            this.writeBytes(toSend);
                         }else{
                             int msgNumber = this.tryParse(splitTextFromClient[1]);
                             if(msgNumber != -1){
@@ -229,7 +239,8 @@ public class SocketCommunication extends Thread {
                             this.flush();
                         }
                     }else if(splitTextFromClient[0].compareTo("NOOP") == 0){
-                        //TODO send an easter egg :-)
+                        this.writeBytes("+OK congratulations you find the secret option");
+                        this.flush();
                     }else if(splitTextFromClient[0].compareTo("RSET") == 0){
                         this.mailUser.unmarkAllMessages();
                         this.writeBytes("+OK all messages unmark");
@@ -271,10 +282,9 @@ public class SocketCommunication extends Thread {
 
     private int writeBytes(String s){
         try {
-            s = s +"\r\n";
             System.out.println(s);
             outputToClient.write(s.getBytes());
-            System.out.println(s.getBytes());
+            //System.out.println(s.getBytes());
             //outputToClient.writeBytes(s);
                 return 0;
         } catch (IOException e) {
@@ -285,6 +295,8 @@ public class SocketCommunication extends Thread {
 
     public int flush(){
         try {
+            String s ="\r\n";
+            outputToClient.write(s.getBytes());
             outputToClient.flush();
             return 0;
         } catch (IOException e) {

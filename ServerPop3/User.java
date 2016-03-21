@@ -137,7 +137,7 @@ public class User {
     
     public int disconnect(){
         FileOutputStream fos;
-        int id_message=0;
+        int id_message=1;
         try{
             fos = new FileOutputStream(new File("mails/user_"+ this.id +".txt"));
             OutputStreamWriter writer = new OutputStreamWriter(fos);

@@ -30,27 +30,23 @@ public class Server {
 		
             boolean running = true;
             while(running){
-                    Socket s = null;
-                    try {
-                            System.out.println("Server awaiting connection");
-                            s = socket.accept();
-                            this.initCommunication(s);
-                    } catch (IOException e) {
-                            e.printStackTrace();
-                    }
+                Socket s = null;
+                try {
+                    System.out.println("Server awaiting connection");
+                    s = socket.accept();
+                    this.initCommunication(s);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
 	}
 
 
 
 	private void initCommunication(Socket s){
-            try {
-                SocketCommunication socketCom = new SocketCommunication(s, this.allUsers);
-                socketCom.start();
-                System.out.println("Socket communication start");
-            } catch (IOException ex) {
-                System.out.println("Connection closed");
-            }
+            SocketCommunication socketCom = new SocketCommunication(s, this.allUsers);
+            socketCom.start();
+            System.out.println("Socket communication start");
 		
 	}
 	

@@ -3,6 +3,8 @@ package ServerPop3.ServerPop3;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 	
@@ -26,25 +28,29 @@ public class Server {
 	
 	public void run(){
 		
-		boolean running = true;
-		while(running){
-			Socket s = null;
-			try {
-				System.out.println("Server awaiting connection");
-				s = socket.accept();
-                                this.initCommunication(s);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
+            boolean running = true;
+            while(running){
+                    Socket s = null;
+                    try {
+                            System.out.println("Server awaiting connection");
+                            s = socket.accept();
+                            this.initCommunication(s);
+                    } catch (IOException e) {
+                            e.printStackTrace();
+                    }
+            }
 	}
 
 
 
-	private void initCommunication(Socket s) throws IOException {
-		SocketCommunication socketCom = new SocketCommunication(s, this.allUsers); 
-		socketCom.start();
-		System.out.println("Socket communication start");
+	private void initCommunication(Socket s){
+            try {
+                SocketCommunication socketCom = new SocketCommunication(s, this.allUsers);
+                socketCom.start();
+                System.out.println("Socket communication start");
+            } catch (IOException ex) {
+                System.out.println("Connection closed");
+            }
 		
 	}
 	

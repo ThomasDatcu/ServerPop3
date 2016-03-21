@@ -40,17 +40,18 @@ public class SocketCommunication extends Thread {
 
     }
 
-    public void start(){
+    @Override
+    public void run(){
         System.out.println("Sending intialization message");
         this.writeBytes("+OK Serveur Pop3 Ready");
         this.flush();
 
         boolean exit = false;
-        String clientUserName = "";
+        String clientUserName = null;
         String textFromClient = "";
         String[] splitTextFromClient = new String[5];
 
-        while(!exit){
+        while(!exit && state !=3){
 
             try {
                     System.out.println("Awainting for customer request");
@@ -92,15 +93,15 @@ public class SocketCommunication extends Thread {
                     }else if(splitTextFromClient[0].compareTo("USER") == 0){
                         System.out.println("Server received an USER command");
                         String userName = splitTextFromClient[1];
-                        clientUserName = allUsers.chechUser(userName);
-                        if(this.mailUser != null){
+                        clientUserName = allUsers.checkUser(userName);
+                        if(clientUserName != null){
                             System.out.println("An user matching the input username has been found");
                             this.state = 1;
                             this.writeBytes("+OK waiting for " + userName + "'s password");
                             this.flush();
                             System.out.println("Moving to the awaiting password state ");
                         }else{
-                            this.writeBytes("-ERR , sorry user : " + userName + "not found");
+                            this.writeBytes("-ERR , sorry user : " + userName + " not found");
                             this.flush();
                             System.out.println("Sending err message to the client "
                                             + "because the input username is unknown");
@@ -233,7 +234,8 @@ public class SocketCommunication extends Thread {
                         this.mailUser.unmarkAllMessages();
                         this.writeBytes("+OK all messages unmark");
                         this.flush();
-                    }else if(splitTextFromClient[0].compareTo("QUIT") == 0){
+                    }else if(splitTextFromClient[0].compareTo("QUIT") == 0){            
+                        this.mailUser.disconnect();
                         state = 3;
                     }else{
                         this.writeBytes("-ERR unknown inbound action");
@@ -241,7 +243,6 @@ public class SocketCommunication extends Thread {
                     }						
                     break;					
                 case 3 :
-                    this.mailUser.disconnect();
                     exit =true;
                     break;					
                 default : 				

@@ -50,7 +50,7 @@ public class UserList {
         return null;
     }
 
-    public String chechUser(String userName) {
+    public String checkUser(String userName) {
         for(User mailUser : this.userList){
             if(mailUser.getName().compareTo(userName) == 0)
                 return userName;

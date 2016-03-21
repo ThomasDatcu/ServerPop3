@@ -15,8 +15,8 @@ import ServerPop3.ServerPop3.UserList;
 public class UserListTest {
     public static void main(String[] args){
         UserList u = new UserList();
-        String res1 = u.chechUser("pute");
-        System.out.println(res1);
+        String res1 = u.checkUser("pute");
+        System.out.println("resultat de check user : " + res1 + "\n");
         User res2 = u.connect("tata", "yoyo");
         if(res2 == null)
             System.out.println("failed to connect");

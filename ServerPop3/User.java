@@ -40,7 +40,7 @@ public class User {
                 String[] messageId = ligne.split(" ");
                 do{
                     ligneMail=buff.readLine();
-                    message += ligneMail + "<CR><LF>";
+                    message += ligneMail + "\r\n";
                 }while(ligneMail.compareTo(".") != 0);
                 System.out.println(messageId[0]+ "/" + messageId[1]);
                 mails.add(
@@ -145,10 +145,10 @@ public class User {
             for(Message mail : this.mails){
                 if(!mail.toBeDeleted){
                     buff.write(id_message + " " + mail.isNewMessage + "\n");
-                    String modif = mail.text.replaceAll("<CR><LF>", "\n");
-                    buff.write(modif);
+                    buff.write(mail.text);
+                    buff.write("\r\n");
+                    id_message++;
                 }
-                id_message++;
             }
             buff.close();
         }catch(FileNotFoundException e){
